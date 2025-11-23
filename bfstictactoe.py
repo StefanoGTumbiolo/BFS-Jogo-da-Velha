@@ -28,7 +28,7 @@ def imprimir_tabuleiro(t):
     print(f" {t[6]} | {t[7]} | {t[8]}\n")
 
 # -------------------------------------------------
-# BFS melhorada (sua IA)
+# BFS melhorada
 # -------------------------------------------------
 
 def bfs_melhor_jogada(tabuleiro, jogador_ia):
