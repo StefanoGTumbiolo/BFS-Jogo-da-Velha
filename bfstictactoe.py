@@ -1,5 +1,6 @@
 import collections
 import random
+import time
 
 # -------------------------------------------------
 # Funções básicas
@@ -19,8 +20,15 @@ def tabuleiro_cheio(t):
 def obter_movimentos_validos(t):
     return [i for i in range(9) if t[i] == ' ']
 
+def imprimir_tabuleiro(t):
+    print(f"\n {t[0]} | {t[1]} | {t[2]}")
+    print("-----------")
+    print(f" {t[3]} | {t[4]} | {t[5]}")
+    print("-----------")
+    print(f" {t[6]} | {t[7]} | {t[8]}\n")
+
 # -------------------------------------------------
-# BFS melhorada
+# BFS melhorada (sua IA)
 # -------------------------------------------------
 
 def bfs_melhor_jogada(tabuleiro, jogador_ia):
@@ -50,7 +58,12 @@ def bfs_melhor_jogada(tabuleiro, jogador_ia):
         t[m] = jogador_ia
         fila.append((t, jogador_humano, m))
 
-    while fila:
+    limite = 200000
+    iteracoes = 0
+
+    while fila and iteracoes < limite:
+        iteracoes += 1
+
         estado, vez, primeira = fila.popleft()
 
         estado_tuple = tuple(estado)
@@ -72,5 +85,80 @@ def bfs_melhor_jogada(tabuleiro, jogador_ia):
                 novo[i] = vez
                 fila.append((novo, prox_vez, primeira))
 
-    # fallback
     return random.choice(movimentos)
+
+# -------------------------------------------------
+# Loop do jogo (interface)
+# -------------------------------------------------
+
+def jogo():
+    tabuleiro = [' '] * 9
+    jogador = 'X'       # humano
+    ia = 'O'            # IA
+
+    print("====================================")
+    print("     JOGO DA VELHA — BFS IA")
+    print("====================================")
+    print("Você é X e joga primeiro.")
+    print("Posições do tabuleiro:")
+    print(" 0 | 1 | 2")
+    print("-----------")
+    print(" 3 | 4 | 5")
+    print("-----------")
+    print(" 6 | 7 | 8")
+    print("====================================")
+
+    while True:
+        # Turno do jogador
+        imprimir_tabuleiro(tabuleiro)
+        jogada_valida = False
+
+        while not jogada_valida:
+            try:
+                pos = int(input("Sua jogada (0-8): "))
+                if pos in range(9) and tabuleiro[pos] == ' ':
+                    tabuleiro[pos] = jogador
+                    jogada_valida = True
+                else:
+                    print("Jogada inválida!")
+            except ValueError:
+                print("Digite um número entre 0 e 8.")
+
+        # Vitória humana?
+        if verificar_vitoria(tabuleiro, jogador):
+            imprimir_tabuleiro(tabuleiro)
+            print("🔥 Você venceu!!! 🔥")
+            break
+
+        if tabuleiro_cheio(tabuleiro):
+            imprimir_tabuleiro(tabuleiro)
+            print("😐 Empate!")
+            break
+
+        # Turno da IA
+        print("\nIA pensando...")
+        inicio = time.time()
+        jogada_ia = bfs_melhor_jogada(tabuleiro, ia)
+        fim = time.time()
+
+        print(f"IA jogou na posição {jogada_ia} (tempo {fim - inicio:.5f}s)")
+
+        tabuleiro[jogada_ia] = ia
+
+        if verificar_vitoria(tabuleiro, ia):
+            imprimir_tabuleiro(tabuleiro)
+            print("💀 A IA venceu!")
+            break
+
+        if tabuleiro_cheio(tabuleiro):
+            imprimir_tabuleiro(tabuleiro)
+            print("😐 Empate!")
+            break
+
+
+# -------------------------------------------------
+# Executar
+# -------------------------------------------------
+
+if __name__ == "__main__":
+    jogo()
